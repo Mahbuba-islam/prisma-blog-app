@@ -25,6 +25,10 @@ model Post {
   authorId   String
   createdAt  DateTime   @default(now())
   updated    DateTime   @updatedAt
+  comments   Comments[]
+
+  @@index([authorId])
+  @@map("posts")
 }
 
 enum postStatus {
@@ -34,17 +38,92 @@ enum postStatus {
 }
 
 model Comments {
-  id        String        @id @default(uuid())
-  content   String        @db.Text
-  authorId  String
-  postId    String
-  parentId  String?
+  id       String    @id @default(uuid())
+  content  String    @db.Text
+  authorId String
+  postId   String
+  post     Post      @relation(fields: [postId], references: [id])
+  parentId String?
+  parent   Comments? @relation("CommentReplies", fields: [parentId], references: [id])
+
   status    commentStatus @default(APPORVED)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  replies   Comments[]    @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([authorId])
+  @@map("comments")
 }
 
 enum commentStatus {
   APPORVED
   REJECT
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  role   String? @default("USER")
+  phone  String?
+  status String? @default("ACTIVE")
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }

@@ -4,7 +4,7 @@ import { prisma } from "./prisma";
 // If your Prisma file is located elsewhere, you can change the path
 import nodemailer from "nodemailer"
 
-
+//node mailer transport for mail send
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -16,13 +16,17 @@ const transporter = nodemailer.createTransport({
 });
 
 
+//connect better auth in ur database with prisma adaftor
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql", // or "mysql", "postgresql", ...etc
     }),
+  
 
+    // trusted origin fronted url
     trustedOrigins:[process.env.APP_URL!],
-
+ 
+   //add user additional fields
     user:{
    additionalFields:{
     role:{
@@ -41,21 +45,29 @@ export const auth = betterAuth({
     }
    }
     },
-     emailAndPassword: { 
+
+
+
+     /// use better auth for authentication
+    emailAndPassword: { 
     enabled: true, 
     autoSignIn:false,
     requireEmailVerification:true
   }, 
 
-   emailVerification: {
+
+  emailVerification: {
+   sendOnSignUp : true,
+   autoSignInAfterVerification:true,
     sendVerificationEmail: async ( { user, url, token }, request) => {
      console.log("verifivation emails sent");
-    const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`
+
+     try{
+      const verificationUrl = `${process.env.APP_URL}/verify-email?token=${token}`
      const info = await transporter.sendMail({
       from: '"prism blog" <prisma-blog@ph.com>', // sender address
       to: user.email, // list of recipients
-      subject: "Hello", // subject line
-      text: "Hello world?", // plain text body
+      subject: "please verify your email", // subject line
       html: `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -125,7 +137,26 @@ export const auth = betterAuth({
     });
 
     
-  }, 
+  } 
+   catch(err:any){
+    console.error(err);
+    throw err
+   }
+   },
+  
+    },
+
+
+    // google sign in
+
+     socialProviders: {
+        google: { 
+            prompt: "select_account consent",
+            accessType:"offline",
+            clientId: process.env.GOOGLE_CLIENT_ID  as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+            
+        }, 
     },
   }
 

@@ -6,8 +6,9 @@ const getPost = async(req:Request, res:Response) => {
  try{
    const {search} = req.query
    console.log({search});
+   const tags = req.query.tags ? (req.query.tags as string).split(',') : []
    const searchString = typeof search === 'string' ? search : undefined
-   const results = await postServices.getPost({search:searchString})
+   const results = await postServices.getPost({search:searchString, tags})
    res.status(200).json(results)
 
   }

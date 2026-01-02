@@ -5,7 +5,8 @@ import { prisma } from "../../lib/prisma";
 import type { PostWhereInput } from "../../../generated/prisma/models";
 
 const getPost = async(search:string|undefined, tags:string[] | [], 
-  isFeatured:boolean | undefined, status:postStatus | undefined, authorId:string|undefined) => {
+  isFeatured:boolean | undefined, status:postStatus | undefined,
+   authorId:string|undefined, limit:number, skip:number) => {
 
   const andConditions:PostWhereInput[] = []
 
@@ -78,6 +79,8 @@ if(authorId){
 }
 
   const results = await prisma.post.findMany({
+    take:limit,
+    skip,
     where:{
       AND:andConditions
     }

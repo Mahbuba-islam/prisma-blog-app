@@ -1,5 +1,6 @@
 import type { Request, Response } from "express"
 import { postServices } from "./post.service"
+import type { postStatus } from "../../../generated/prisma/enums"
 
 
 const getPost = async(req:Request, res:Response) => {
@@ -18,7 +19,16 @@ const getPost = async(req:Request, res:Response) => {
   isFeatured === 'true' ? true : 
   isFeatured === 'false' ? false : undefined :undefined
 
-   const results = await postServices.getPost(searchString, tags, isFeaturedBoolean)
+
+   // filter with status
+
+   const status = req.query.status as postStatus | undefined
+
+   //filter with authorId
+
+   const authorId = req.query.authorId as string | undefined
+
+   const results = await postServices.getPost(searchString, tags, isFeaturedBoolean, status, authorId)
    res.status(200).json(results)
   }
   

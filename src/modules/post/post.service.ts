@@ -6,7 +6,8 @@ import type { PostWhereInput } from "../../../generated/prisma/models";
 
 const getPost = async(search:string|undefined, tags:string[] | [], 
   isFeatured:boolean | undefined, status:postStatus | undefined,
-   authorId:string|undefined, limit:number, skip:number) => {
+   authorId:string|undefined, limit:number, skip:number,
+  sortBy:string, sortOrder:string) => {
 
   const andConditions:PostWhereInput[] = []
 
@@ -83,7 +84,11 @@ if(authorId){
     skip,
     where:{
       AND:andConditions
+    },
+    orderBy: {
+      [sortBy]:sortOrder
     }
+
   })
   return results
 }

@@ -6,7 +6,7 @@ import type { PostWhereInput } from "../../../generated/prisma/models";
 
 const getPost = async(search:string|undefined, tags:string[] | [], 
   isFeatured:boolean | undefined, status:postStatus | undefined,
-   authorId:string|undefined, limit:number, skip:number,
+   authorId:string|undefined, page:number, limit:number, skip:number, 
   sortBy:string, sortOrder:string) => {
 
   const andConditions:PostWhereInput[] = []
@@ -79,7 +79,7 @@ if(authorId){
   })
 }
 
-  const results = await prisma.post.findMany({
+  const allPost = await prisma.post.findMany({
     take:limit,
     skip,
     where:{
@@ -90,8 +90,80 @@ if(authorId){
     }
 
   })
-  return results
+
+
+// metedata
+
+// total data count
+ 
+const totalData = await prisma.post.count({
+   where:{
+      AND:andConditions
+    }
+})
+
+
+  return {
+    data:allPost,
+   totalData,
+   page,
+   limit,
+   totalPages:Math.ceil(totalData/limit)
+
+  }
 }
+
+
+
+
+// get post by id
+
+const getPostById = async(postId:string|undefined) => {
+   
+//  return await prisma.$transaction(async(tx)=> {
+
+//  })
+
+  return await prisma.$transaction(async(tx) => {
+     // update view count
+  await tx.post.update({
+    where:{
+      id:postId!
+    },
+    data:{
+     views: {
+      increment:1
+     }
+    }
+  })
+
+
+
+
+   
+  const postData = await tx.post.findUnique({
+    where : {
+      id:postId!
+    }
+
+    
+  })
+
+  return postData
+  })
+
+
+
+ 
+  
+}
+
+
+
+
+
+
+
 
 
 const createPost = async (data: Omit<Post, 'id' | 'createdAt'| 'updatedAt' | "isFeatured" | 'authorId'>, userId:string) => {
@@ -106,6 +178,7 @@ const createPost = async (data: Omit<Post, 'id' | 'createdAt'| 'updatedAt' | "is
 
 export const postServices = {
     getPost,
+    getPostById,
     createPost
     
 }

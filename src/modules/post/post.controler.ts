@@ -39,11 +39,11 @@ const getPost = async(req:Request, res:Response) => {
    
    const options = req.query
    
-      const {limit,skip, sortBy, sortOrder} = sortingAndPagination(options)
+      const {page,limit,skip, sortBy, sortOrder} = sortingAndPagination(options)
 
   
   const results = await postServices.getPost(searchString, tags, isFeaturedBoolean,
-     status, authorId, limit, skip, sortBy, sortOrder)
+     status, authorId, page, limit, skip, sortBy, sortOrder)
 
    res.status(200).json(results)
   }
@@ -56,6 +56,25 @@ const getPost = async(req:Request, res:Response) => {
  }
 }
 
+
+
+
+
+// getpostBy Id
+
+const getPostById = async(req:Request, res:Response)=>{
+  try{
+    const {id} = req.params 
+   const results = await postServices.getPostById(id)
+   res.status(200).json(results)
+  }
+  catch(err){
+    res.status(400).json({
+    error:'faild to get post by this id',
+    details:err
+    })
+  }
+}
 
 
 
@@ -83,5 +102,6 @@ const createPost = async (req:Request, res:Response) => {
 
 export const postControler = {
    getPost,
+   getPostById,
     createPost
 }

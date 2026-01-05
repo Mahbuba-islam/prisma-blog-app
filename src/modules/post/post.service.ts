@@ -1,6 +1,6 @@
 
 
-import type { Post, postStatus } from "../../../generated/prisma/client";
+import { commentStatus, type Post, type postStatus } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import type { PostWhereInput } from "../../../generated/prisma/models";
 
@@ -87,8 +87,14 @@ if(authorId){
     },
     orderBy: {
       [sortBy]:sortOrder
-    }
+    },
 
+
+   include:{
+    _count:{
+      select:{comments:true}
+    }
+   }
   })
 
 
@@ -149,34 +155,60 @@ const getPostById = async(postId:string|undefined) => {
     include:{
       comments:{
         where:{
-          parentId:null
+          parentId:null,
+          status:commentStatus.APPORVED
         },
-
-        include:{
+        
+      orderBy:{createdAt:"desc"},
+     include:{
           replies:{
+            where:{
+              status:commentStatus.APPORVED
+            },
+
+            orderBy:{createdAt:'asc'},
             include:{
               replies:{
+              where:{
+              status:commentStatus.APPORVED
+            },
+
+            orderBy:{createdAt:'asc'},
+              
                 include:{
-                  replies:true
+                  replies:{
+                    where:{
+                      status:commentStatus.APPORVED
+                    },
+
+                    orderBy:{createdAt:'asc'}
+                  }
                 }
               }
             }
           }
         }
+      },
+      _count:{
+        select:{
+          comments:true
+        }
       }
-    }
+    },
+
+
+    
     
   })
+
+
 
   return postData
   })
 
 
 
- 
-  
 }
-
 
 
 
@@ -198,6 +230,6 @@ const createPost = async (data: Omit<Post, 'id' | 'createdAt'| 'updatedAt' | "is
 export const postServices = {
     getPost,
     getPostById,
-    createPost
+    createPost,
     
 }

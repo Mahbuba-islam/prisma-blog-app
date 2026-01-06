@@ -114,7 +114,31 @@ return results
  }
 
 
+// admin can update comment status
 
+const moderateComment = async(commentId:string, data:{status:commentStatus}) => {
+ const commentData =  await prisma.comments.findUniqueOrThrow({
+    where:{
+      id:commentId
+    }
+  })
+
+
+  if(commentData.status === data.status){
+    throw new Error (`status ${data.status} already up to date `)
+  }
+
+
+
+  const results = await prisma.comments.update({
+    where:{
+      id:commentId
+    },
+    data
+  })
+
+  return results
+}
 
 
 
@@ -123,5 +147,6 @@ export const commentServices = {
   createComment,
   getCommentByAuthorId,
   deleteComment,
-  updatedComment
+  updatedComment,
+  moderateComment
 }

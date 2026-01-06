@@ -2,6 +2,7 @@ import type { Request, Response } from "express"
 import { postServices } from "./post.service"
 import type { postStatus } from "../../../generated/prisma/enums"
 import sortingAndPagination from "../../helper/paginationAndSorting"
+import { getSystemErrorMessage } from "node:util"
 
 
 const getPost = async(req:Request, res:Response) => {
@@ -100,8 +101,34 @@ const createPost = async (req:Request, res:Response) => {
     }
 }
 
+
+// get my posts
+
+const getMyPosts = async(req:Request, res:Response) => {
+ try{
+  const user = req.user
+  console.log(user)
+  const results = await postServices.getMyPosts(user?.id as string)
+  return res.status(200).json(results)
+ }
+ catch(err){
+  const errorMessage = (err instanceof Error) ? err.message : " data fetched failed"
+ return res.status(400).json({
+  error:errorMessage,
+  details:err
+
+  })
+ }
+}
+
+
+
+
+
+
 export const postControler = {
    getPost,
    getPostById,
-    createPost
+    createPost,
+    getMyPosts
 }

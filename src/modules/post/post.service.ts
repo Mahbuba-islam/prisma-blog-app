@@ -214,6 +214,53 @@ const getPostById = async(postId:string|undefined) => {
 
 
 
+// get my posts
+
+const getMyPosts = async(authorId:string)=>{
+  console.log(authorId);
+  const results = await prisma.post.findMany({
+   where:{
+    authorId
+   },
+   orderBy:{
+    createdAt:"desc"
+   },
+   include:{
+    _count:{
+      select:{
+        comments:true
+      }
+    },
+    comments:true
+   },
+
+   
+
+
+  })
+
+ // total posts
+//  const totalPosts = await prisma.post.count({
+//   where:{
+//     authorId
+//   }
+//  })
+
+//use aggeregate
+const totalPosts = await prisma.post.aggregate({
+  _count:{
+    id:true
+  },
+  where:{
+    authorId
+  }
+})
+
+   return {
+    data:results,
+    totalPosts
+   }
+}
 
 
 
@@ -231,5 +278,6 @@ export const postServices = {
     getPost,
     getPostById,
     createPost,
+    getMyPosts
     
 }

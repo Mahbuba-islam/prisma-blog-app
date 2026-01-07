@@ -175,11 +175,33 @@ const deletePost = async(req:Request, res:Response) => {
 
 
 
+
+// dashboard 
+
+const getStates = async(req:Request, res:Response)=>{
+  try{
+    const results = await postServices.getStates()
+    return res.status(200).json(results)
+  }
+  catch(err){
+    const errMessage = (err instanceof Error) ? err.message : "states fetched failed"
+    return res.status(400).json({
+    error:errMessage,
+    details:err
+    })
+  }
+}
+
+
+
+
+
 export const postControler = {
    getPost,
    getPostById,
     createPost,
     getMyPosts,
     updateOwnPost,
-    deletePost
+    deletePost,
+    getStates
 }

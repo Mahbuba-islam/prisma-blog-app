@@ -347,7 +347,16 @@ return await prisma.post.delete({
 
 // dashboard
 
-const
+// postcount, totalPublishedPost, totaldraftPost, totalComments, totalViews
+
+const getStates = async()=>{
+  
+  // use transiction
+  return await prisma.$transaction(async(tx) => {
+    
+  })
+
+}
 
 
 
@@ -370,6 +379,7 @@ export const postServices = {
     createPost,
     getMyPosts,
     updateOwnPost,
-    deletePost
+    deletePost,
+    getStates
     
 }

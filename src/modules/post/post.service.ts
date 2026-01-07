@@ -3,6 +3,7 @@
 import { commentStatus, type Post, type postStatus } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 import type { PostWhereInput } from "../../../generated/prisma/models";
+import { error } from "node:console";
 
 const getPost = async(search:string|undefined, tags:string[] | [], 
   isFeatured:boolean | undefined, status:postStatus | undefined,
@@ -311,6 +312,44 @@ const results = await prisma.post.update({
 
 
 
+// delete post 
+// user delete their own posts
+// admin delete every posts
+
+
+const deletePost = async(postId:string, isAdmin:boolean, userId:string)=>{
+   console.log(postId, isAdmin, userId);
+  //check this post exists
+   const postData = await prisma.post.findUniqueOrThrow({
+    where:{
+      id:postId
+    },
+    select:{
+      id:true,
+      authorId:true
+    }
+})
+
+
+if(!isAdmin && (postData.authorId !== userId  ) ) {
+  throw new Error ("you are not the owner of this post")
+}
+  
+
+return await prisma.post.delete({
+  where:{
+    id:postId
+  }
+})
+
+}
+
+
+// dashboard
+
+const
+
+
 
 
 
@@ -330,6 +369,7 @@ export const postServices = {
     getPostById,
     createPost,
     getMyPosts,
-    updateOwnPost
+    updateOwnPost,
+    deletePost
     
 }

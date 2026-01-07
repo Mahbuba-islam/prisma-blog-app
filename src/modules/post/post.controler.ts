@@ -151,10 +151,35 @@ const updateOwnPost = async(req:Request, res:Response) => {
 
 
 
+
+// delete post
+
+const deletePost = async(req:Request, res:Response) => {
+ try{
+  const {postId} = req.params
+  const user = req.user
+  const isAdmin = user?.role === UserRole.ADMIN
+  const results = await postServices.deletePost(postId as string, isAdmin, user?.id as string)
+  return res.status(200).json(results)
+
+ }
+
+ catch(err){
+  const errorMessage = (err instanceof Error) ? err.message : "delete failed"
+  return res.status(400).json({
+    error:errorMessage,
+    details:err
+  })
+ }
+}
+
+
+
 export const postControler = {
    getPost,
    getPostById,
     createPost,
     getMyPosts,
-    updateOwnPost
+    updateOwnPost,
+    deletePost
 }

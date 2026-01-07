@@ -3,6 +3,7 @@ import { postServices } from "./post.service"
 import type { postStatus } from "../../../generated/prisma/enums"
 import sortingAndPagination from "../../helper/paginationAndSorting"
 import { getSystemErrorMessage } from "node:util"
+import { UserRole } from "../../middllewares/auth"
 
 
 const getPost = async(req:Request, res:Response) => {
@@ -126,9 +127,34 @@ const getMyPosts = async(req:Request, res:Response) => {
 
 
 
+// update own post
+
+const updateOwnPost = async(req:Request, res:Response) => {
+ try{
+  const {id} = req.params
+  const data = req.body
+  const user = req.user
+  console.log(user);
+  const isAdmin = user?.role === UserRole.ADMIN
+  console.log(isAdmin);
+ const results = await postServices.updateOwnPost(id as string, user?.id as string, data, isAdmin)
+ res.status(200).json(results)
+ }
+ catch(err){
+  const errorMessage = (err instanceof Error)? err.message : "update failed"
+  res.status(400).json({
+    error:errorMessage,
+    details:err
+  })
+ }
+}
+
+
+
 export const postControler = {
    getPost,
    getPostById,
     createPost,
-    getMyPosts
+    getMyPosts,
+    updateOwnPost
 }

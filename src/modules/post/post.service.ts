@@ -218,6 +218,15 @@ const getPostById = async(postId:string|undefined) => {
 
 const getMyPosts = async(authorId:string)=>{
   console.log(authorId);
+ 
+   await prisma.user.findUniqueOrThrow({
+    where:{
+      id:authorId,
+      status:"ACTIVE"
+    }
+  })
+
+
   const results = await prisma.post.findMany({
    where:{
     authorId
@@ -264,6 +273,48 @@ const totalPosts = await prisma.post.aggregate({
 
 
 
+// updates own posts
+// if user - user can't update isFeatured 
+// admin update all user posts
+const updateOwnPost = async( postId:string, userId:string, data:Partial<Post>, isAdmin:Boolean ) => {
+ 
+  const postData = await prisma.post.findUniqueOrThrow({
+    where:{
+      id:postId
+    },
+    select:{
+      id:true,
+      authorId:true
+    }
+  })
+
+
+if(!isAdmin && (postData.authorId !== userId)){
+  throw new Error ("You are not the owner of this post")
+}
+
+if(!isAdmin){
+  delete data.isFeatured
+}
+
+
+const results = await prisma.post.update({
+  where:{
+    id:postId
+    
+  },
+  data
+ })
+
+ return results
+}
+
+
+
+
+
+
+
 const createPost = async (data: Omit<Post, 'id' | 'createdAt'| 'updatedAt' | "isFeatured" | 'authorId'>, userId:string) => {
   const result = await prisma.post.create({
   data:{
@@ -278,6 +329,7 @@ export const postServices = {
     getPost,
     getPostById,
     createPost,
-    getMyPosts
+    getMyPosts,
+    updateOwnPost
     
 }

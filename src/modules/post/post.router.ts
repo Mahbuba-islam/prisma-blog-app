@@ -13,7 +13,7 @@ router.get('/my-posts', auth(UserRole.USER, UserRole.ADMIN), postControler.getMy
 
 router.get('/:id', postControler.getPostById)
 router.post('/', auth(UserRole.USER, UserRole.ADMIN),  postControler.createPost)
-
+router.patch('/:id', auth(UserRole.USER, UserRole.ADMIN), postControler.updateOwnPost)
 export const postRouter = router;
 
 
